@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/go-mixins/log"
 	"github.com/go-mixins/log/logrus"
 
 	"github.com/go-mixins/bot/telegram"
@@ -23,6 +24,15 @@ func main() {
 	defer bot.Close()
 	bot.On(bot.Command("/start"), func(ctx context.Context) error {
 		return bot.Reply(ctx, "Hello!")
+	})
+	bot.On(bot.Command("/quit"), func(ctx context.Context) error {
+		return bot.Reply(ctx, "Bye!")
+	})
+	bot.On(bot.Message, func(ctx context.Context) error {
+		logger.WithContext(log.M{
+			"from": bot.UserName(ctx),
+		}).Infof("message: %s", bot.Text(ctx))
+		return nil
 	})
 	if err = bot.Run(); err != nil {
 		logger.Fatalf("%+v", err)

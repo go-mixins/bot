@@ -11,10 +11,12 @@ import (
 
 type Bot struct {
 	bot.Driver
-	mw middleware.Middleware
-	h  middleware.Handler
-	l  sync.RWMutex
+	pre, mw middleware.Middleware
+	h       middleware.Handler
+	l       sync.RWMutex
 }
+
+var _ bot.Bot = (*Bot)(nil)
 
 func New(driver bot.Driver) (res *Bot, err error) {
 	switch {
@@ -24,10 +26,7 @@ func New(driver bot.Driver) (res *Bot, err error) {
 	}
 	res = &Bot{
 		Driver: driver,
-		mw:     driver.Context,
-		h: func(context.Context) error {
-			return nil
-		},
+		pre:    driver.Context,
 	}
 	return
 }
@@ -44,7 +43,7 @@ func (b *Bot) Run() error {
 func (b *Bot) processUpdate() (err error) {
 	b.l.RLock()
 	defer b.l.RUnlock()
-	return b.Context(context.Background(), b.mw.Then(b.h))
+	return b.pre.Use(b.mw).Then(b.h).Apply(context.Background())
 }
 
 func (b *Bot) On(p middleware.Predicate, h middleware.Handler) {
@@ -56,5 +55,5 @@ func (b *Bot) On(p middleware.Predicate, h middleware.Handler) {
 func (b *Bot) Use(mws ...middleware.Middleware) {
 	b.l.Lock()
 	defer b.l.Unlock()
-	b.mw = b.mw.Use(mws...)
+	b.pre = b.pre.Use(mws...)
 }

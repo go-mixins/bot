@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/andviro/middleware"
@@ -11,7 +10,6 @@ import (
 
 func (drv *Driver) Command(cmd string) middleware.Predicate {
 	return func(ctx context.Context) bool {
-		fmt.Println("command", ctx)
 		upd, ok := ctx.Value(botKey).(tgbotapi.Update)
 		if !ok {
 			return false
@@ -22,7 +20,6 @@ func (drv *Driver) Command(cmd string) middleware.Predicate {
 			text = upd.Message.Text
 		}
 		text = strings.TrimSpace(text)
-		fmt.Println("command!", text)
 		if len(text) == 0 || !strings.HasPrefix(text, "/") {
 			return false
 		}

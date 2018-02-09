@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/andviro/middleware"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
@@ -51,9 +50,7 @@ func (drv *Driver) Close() error {
 }
 
 func (drv *Driver) Context(ctx context.Context, next middleware.Handler) error {
-	fmt.Println("context", ctx)
-	ctx = context.WithValue(ctx, botKey, <-drv.updates)
-	return next(ctx)
+	return next.Apply(context.WithValue(ctx, botKey, <-drv.updates))
 }
 
 func (drv *Driver) Next() bool {
