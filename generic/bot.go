@@ -44,7 +44,7 @@ func (b *Bot) Run() error {
 func (b *Bot) processUpdate() (err error) {
 	b.l.RLock()
 	defer b.l.RUnlock()
-	return middleware.Middleware(b.Context).Use(b.mw)(context.Background(), b.h)
+	return b.Context(context.Background(), b.mw.Then(b.h))
 }
 
 func (b *Bot) On(p middleware.Predicate, h middleware.Handler) {
