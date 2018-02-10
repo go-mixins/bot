@@ -3,6 +3,6 @@ package bot
 import "context"
 
 type ContextFuncs interface {
-	UserName(context.Context) string
+	From(context.Context) *User
 	Text(context.Context) string
 }

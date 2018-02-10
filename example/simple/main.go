@@ -29,9 +29,14 @@ func main() {
 		return bot.Reply(ctx, "Bye!")
 	})
 	bot.On(bot.Message, func(ctx context.Context) error {
-		logger.WithContext(log.M{
-			"from": bot.UserName(ctx),
-		}).Infof("message: %s", bot.Text(ctx))
+		from := bot.From(ctx)
+		if from != nil {
+			logger.WithContext(log.M{
+				"from": from.UserName,
+			}).Infof("message: %s", bot.Text(ctx))
+			return nil
+		}
+		logger.Warnf("anonymous message: ", bot.Text(ctx))
 		return nil
 	})
 	if err = bot.Run(); err != nil {
