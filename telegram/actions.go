@@ -9,18 +9,15 @@ import (
 )
 
 func (drv *Driver) Reply(ctx context.Context, obj interface{}) (err error) {
-	msg := drv.message(ctx)
-	if msg == nil || msg.Chat == nil {
+	message := drv.message(ctx)
+	if message == nil || message.Chat == nil {
 		return bot.Errors.New("no chat to reply in")
 	}
-	msgID := drv.msgID(ctx)
 	var v tgbotapi.Chattable
 	switch t := obj.(type) {
 	case string:
-		msg := tgbotapi.NewMessage(msg.Chat.ID, t)
-		if msgID != 0 {
-			msg.ReplyToMessageID = msgID
-		}
+		msg := tgbotapi.NewMessage(message.Chat.ID, t)
+		msg.ReplyToMessageID = message.MessageID
 		v = msg
 	default:
 		return bot.Errors.New("unsupported send object")

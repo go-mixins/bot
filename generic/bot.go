@@ -16,8 +16,6 @@ type Bot struct {
 	l       sync.RWMutex
 }
 
-var _ bot.Bot = (*Bot)(nil)
-
 func New(driver bot.Driver) (res *Bot, err error) {
 	switch {
 	case driver == nil:
@@ -56,4 +54,10 @@ func (b *Bot) Use(mws ...middleware.Middleware) {
 	b.l.Lock()
 	defer b.l.Unlock()
 	b.pre = b.pre.Use(mws...)
+}
+
+func (b *Bot) Handle(h middleware.Handler) {
+	b.l.Lock()
+	defer b.l.Unlock()
+	b.h = h
 }

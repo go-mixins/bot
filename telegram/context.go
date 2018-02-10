@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/go-mixins/bot"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
@@ -11,6 +12,9 @@ func (drv *Driver) Text(ctx context.Context) (res string) {
 	msg := drv.message(ctx)
 	if msg == nil {
 		return
+	}
+	if msg.Caption != "" {
+		return msg.Caption
 	}
 	return msg.Text
 }
@@ -28,23 +32,6 @@ func (drv *Driver) message(ctx context.Context) (res *tgbotapi.Message) {
 		res = upd.EditedChannelPost
 	case upd.EditedMessage != nil:
 		res = upd.EditedMessage
-	}
-	return
-}
-
-func (drv *Driver) msgID(ctx context.Context) (res int) {
-	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
-	switch {
-	case upd.Message != nil:
-		res = upd.Message.MessageID
-	case upd.CallbackQuery != nil && upd.CallbackQuery.Message != nil:
-		res = upd.CallbackQuery.Message.MessageID
-	case upd.ChannelPost != nil:
-		res = upd.ChannelPost.MessageID
-	case upd.EditedChannelPost != nil:
-		res = upd.EditedChannelPost.MessageID
-	case upd.EditedMessage != nil:
-		res = upd.EditedMessage.MessageID
 	}
 	return
 }
@@ -85,4 +72,10 @@ func (drv *Driver) From(ctx context.Context) *bot.User {
 		UserName:     from.UserName,
 		LanguageCode: from.LanguageCode,
 	}
+}
+
+func (drv *Driver) Debug(ctx context.Context) string {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	jsonData, _ := json.MarshalIndent(upd, "", "  ")
+	return string(jsonData)
 }
