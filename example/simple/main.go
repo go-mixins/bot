@@ -50,7 +50,7 @@ func main() {
 	b.On(tg.Update("NewChatMembers"), func(ctx context.Context) error {
 		for _, u := range *tg.Message(ctx).NewChatMembers {
 			if u.UserName == b.Self.UserName {
-				continue
+				return b.Reply(ctx, "Hello all!")
 			}
 			if err := b.Reply(ctx, "Hi, "+u.UserName+"!"); err != nil {
 				return err
@@ -60,6 +60,10 @@ func main() {
 	})
 	b.On(tg.Update("LeftChatMember"), func(ctx context.Context) error {
 		u := tg.Message(ctx).LeftChatMember
+		if u.UserName == b.Self.UserName {
+			logger.Warnf("Was kicked from %s by %s", tg.Chat(ctx).Title, tg.From(ctx))
+			return nil
+		}
 		return b.Reply(ctx, "Bye, "+u.UserName+"!")
 	})
 	if err = b.Run(); err != nil {
