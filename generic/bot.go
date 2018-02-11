@@ -5,43 +5,30 @@ import (
 	"sync"
 
 	"github.com/andviro/middleware"
-
 	"github.com/go-mixins/bot"
 )
 
 type Bot struct {
-	bot.Driver
 	pre, mw middleware.Middleware
-	h       middleware.Handler
+	Handler middleware.Handler
 	l       sync.RWMutex
 }
 
-func New(driver bot.Driver) (res *Bot, err error) {
-	switch {
-	case driver == nil:
-		err = bot.Errors.New("driver not configured")
-		return
-	}
-	res = &Bot{
-		Driver: driver,
-		pre:    driver.Context,
-	}
-	return
+var _ bot.Bot = (*Bot)(nil)
+
+func (b *Bot) handle(ctx context.Context) (err error) {
+	b.l.RLock()
+	defer b.l.RUnlock()
+	return b.pre.Use(b.mw).Then(b.Handler).Apply(ctx)
 }
 
-func (b *Bot) Run() error {
-	for b.Driver.Next() {
-		if err := b.processUpdate(); err != nil {
+func (b *Bot) Run(driver bot.Driver) error {
+	for driver.Next() {
+		if err := b.handle(driver.Context()); err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-func (b *Bot) processUpdate() (err error) {
-	b.l.RLock()
-	defer b.l.RUnlock()
-	return b.pre.Use(b.mw).Then(b.h).Apply(context.Background())
 }
 
 func (b *Bot) On(p middleware.Predicate, h middleware.Handler) {
@@ -54,10 +41,4 @@ func (b *Bot) Use(mws ...middleware.Middleware) {
 	b.l.Lock()
 	defer b.l.Unlock()
 	b.pre = b.pre.Use(mws...)
-}
-
-func (b *Bot) Handle(h middleware.Handler) {
-	b.l.Lock()
-	defer b.l.Unlock()
-	b.h = h
 }

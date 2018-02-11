@@ -6,17 +6,12 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func (drv *Driver) WithReply(ctx context.Context, args ...interface{}) {
-	if len(args) == 0 {
-		return
-	}
-	msg := drv.message(ctx)
-	if msg == nil {
-		return
-	}
-	dest, ok := args[0].(*tgbotapi.MessageConfig)
+func (drv *Driver) WithReply(ctx context.Context, arg interface{}) {
+	dest, ok := arg.(*tgbotapi.MessageConfig)
 	if !ok {
 		return
 	}
-	dest.ReplyToMessageID = msg.MessageID
+	if msg := drv.Message(ctx); msg != nil {
+		dest.ReplyToMessageID = msg.MessageID
+	}
 }

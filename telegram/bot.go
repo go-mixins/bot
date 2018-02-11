@@ -2,9 +2,7 @@ package telegram
 
 import (
 	"context"
-	"encoding/json"
 
-	"github.com/andviro/middleware"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/go-mixins/bot"
@@ -19,46 +17,13 @@ const (
 )
 
 type Driver struct {
-	api     *tgbotapi.BotAPI
+	*tgbotapi.BotAPI
 	stop    chan struct{}
-	closed  bool
 	updates tgbotapi.UpdatesChannel
 }
 
-var _ bot.Driver = (*Driver)(nil)
-
-func DebugDump(ctx context.Context) string {
-	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
-	jsonData, _ := json.MarshalIndent(upd, "", "  ")
-	return string(jsonData)
-}
-
-func New(token string) (res *generic.Bot, err error) {
-	driver := &Driver{
-		stop: make(chan struct{}),
-	}
-	driver.api, err = tgbotapi.NewBotAPI(token)
-	if err != nil {
-		err = bot.Errors.Wrap(err, "creating telegram bot")
-		return
-	}
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-	driver.updates, err = driver.api.GetUpdatesChan(u)
-	if err != nil {
-		err = bot.Errors.Wrap(err, "getting updates")
-		return
-	}
-	return generic.New(driver)
-}
-
-func (drv *Driver) Close() error {
+func (drv *Driver) Close() {
 	close(drv.stop)
-	return nil
-}
-
-func (drv *Driver) Context(ctx context.Context, next middleware.Handler) error {
-	return next.Apply(context.WithValue(ctx, botKey, <-drv.updates))
 }
 
 func (drv *Driver) Next() bool {
@@ -68,4 +33,37 @@ func (drv *Driver) Next() bool {
 	default:
 		return true
 	}
+}
+
+func (drv *Driver) Context() context.Context {
+	return context.WithValue(context.Background(), botKey, <-drv.updates)
+}
+
+var _ bot.Driver = (*Driver)(nil)
+
+type Bot struct {
+	Driver
+	generic.Bot
+}
+
+var _ bot.Bot = (*Bot)(nil)
+
+func New(token string) (res *Bot, err error) {
+	res = new(Bot)
+	res.Driver.stop = make(chan struct{})
+	if res.Driver.BotAPI, err = tgbotapi.NewBotAPI(token); err != nil {
+		err = bot.Errors.Wrap(err, "creating telegram bot")
+		return
+	}
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+	if res.Driver.updates, err = res.Driver.GetUpdatesChan(u); err != nil {
+		err = bot.Errors.Wrap(err, "getting updates")
+		return
+	}
+	return
+}
+
+func (b *Bot) Run() error {
+	return b.Bot.Run(&b.Driver)
 }

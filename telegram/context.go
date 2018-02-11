@@ -3,46 +3,52 @@ package telegram
 import (
 	"context"
 
-	"github.com/go-mixins/bot"
+	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-type MessageMeta struct {
-	ID int
-}
-
-type ChatMeta struct {
-	ID int64
-}
-
-type UserMeta struct {
-	ID    int
-	IsBot bool
-}
-
-func (drv *Driver) Me(ctx context.Context) *bot.User {
-	return user(&drv.api.Self)
-}
-
-func (drv *Driver) From(ctx context.Context) *bot.User {
-	return user(drv.from(ctx))
-}
-
-func (drv *Driver) Chat(ctx context.Context) *bot.Chat {
-	return chat(drv.chat(ctx))
-}
-
-func (drv *Driver) Msg(ctx context.Context) *bot.Message {
-	return message(drv.message(ctx))
-}
-
-func (drv *Driver) NewChatMembers(ctx context.Context) (res []*bot.User) {
-	msg := drv.message(ctx)
-	if msg.NewChatMembers == nil {
-		return
-	}
-	res = make([]*bot.User, len(*msg.NewChatMembers))
-	for i, u := range *msg.NewChatMembers {
-		res[i] = user(&u)
+func (drv *Driver) From(ctx context.Context) (from *tgbotapi.User) {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	switch {
+	case upd.Message != nil:
+		from = upd.Message.From
+	case upd.CallbackQuery != nil:
+		from = upd.CallbackQuery.From
+	case upd.ChannelPost != nil:
+		from = upd.ChannelPost.From
+	case upd.ChosenInlineResult != nil:
+		from = upd.ChosenInlineResult.From
+	case upd.EditedChannelPost != nil:
+		from = upd.EditedChannelPost.From
+	case upd.EditedMessage != nil:
+		from = upd.EditedMessage.From
+	case upd.InlineQuery != nil:
+		from = upd.InlineQuery.From
+	case upd.PreCheckoutQuery != nil:
+		from = upd.PreCheckoutQuery.From
+	case upd.ShippingQuery != nil:
+		from = upd.ShippingQuery.From
 	}
 	return
+}
+
+func (drv *Driver) Chat(ctx context.Context) (res *tgbotapi.Chat) {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	switch {
+	case upd.Message != nil:
+		res = upd.Message.Chat
+	case upd.CallbackQuery != nil && upd.CallbackQuery.Message != nil:
+		res = upd.CallbackQuery.Message.Chat
+	case upd.ChannelPost != nil:
+		res = upd.ChannelPost.Chat
+	case upd.EditedChannelPost != nil:
+		res = upd.EditedChannelPost.Chat
+	case upd.EditedMessage != nil:
+		res = upd.EditedMessage.Chat
+	}
+	return
+}
+
+func (drv *Driver) Message(ctx context.Context) (res *tgbotapi.Message) {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	return upd.Message
 }

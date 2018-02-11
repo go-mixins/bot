@@ -2,17 +2,10 @@ package bot
 
 import (
 	"context"
-
-	"github.com/andviro/middleware"
 )
 
 type Driver interface {
-	Actions
-	Predicates
-	ContextFuncs
-	Options
-	Context(context.Context, middleware.Handler) error
-	Close() error
+	Context() context.Context
 	Next() bool
 }
 

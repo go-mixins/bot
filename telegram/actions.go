@@ -9,7 +9,7 @@ import (
 )
 
 func (drv *Driver) Reply(ctx context.Context, text string, opts ...bot.Option) (err error) {
-	chat := drv.chat(ctx)
+	chat := drv.Chat(ctx)
 	if chat == nil {
 		return bot.Errors.New("no chat to reply in")
 	}
@@ -17,7 +17,7 @@ func (drv *Driver) Reply(ctx context.Context, text string, opts ...bot.Option) (
 	for _, opt := range opts {
 		opt(ctx, &msg)
 	}
-	_, err = drv.api.Send(msg)
+	_, err = drv.Send(msg)
 	if err != nil {
 		err = bot.Errors.Wrap(err, "sending message")
 	}
