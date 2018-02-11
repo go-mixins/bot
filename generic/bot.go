@@ -9,24 +9,41 @@ import (
 )
 
 type Bot struct {
-	pre, mw middleware.Middleware
-	Handler middleware.Handler
-	l       sync.RWMutex
+	pre, mw     middleware.Middleware
+	Handler     middleware.Handler
+	Concurrency int
+	l           sync.RWMutex
 }
 
 var _ bot.Bot = (*Bot)(nil)
 
-func (b *Bot) handle(ctx context.Context) (err error) {
+type empty struct{}
+
+type Limiter chan empty
+
+func (l Limiter) Enter() {
+	l <- empty{}
+}
+
+func (l Limiter) Exit() {
+	<-l
+}
+
+func (b *Bot) handle(ctx context.Context, sem Limiter) (err error) {
+	defer sem.Exit()
 	b.l.RLock()
 	defer b.l.RUnlock()
 	return b.pre.Use(b.mw).Then(b.Handler).Apply(ctx)
 }
 
 func (b *Bot) Run(driver bot.Driver) error {
+	if b.Concurrency == 0 {
+		b.Concurrency = 1
+	}
+	sem := make(Limiter, b.Concurrency)
 	for driver.Next() {
-		if err := b.handle(driver.Context()); err != nil {
-			return err
-		}
+		sem.Enter()
+		go b.handle(driver.Context(), sem)
 	}
 	return nil
 }

@@ -22,6 +22,7 @@ func main() {
 	if err != nil {
 		logger.Fatalf("%+v", err)
 	}
+	b.Concurrency = 100
 	b.Use(func(ctx context.Context, next middleware.Handler) (err error) {
 		msg := tg.Message(ctx)
 		if msg != nil {
