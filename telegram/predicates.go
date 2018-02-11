@@ -8,16 +8,16 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func (drv *Driver) Command(cmd string) middleware.Predicate {
+func Command(cmd string) middleware.Predicate {
 	return func(ctx context.Context) bool {
-		if msg := drv.Message(ctx); msg != nil {
+		if msg := Message(ctx); msg != nil {
 			return msg.IsCommand() && cmd == msg.Command()
 		}
 		return false
 	}
 }
 
-func (drv *Driver) Hears(word string) middleware.Predicate {
+func Hears(word string) middleware.Predicate {
 	return func(ctx context.Context) bool {
 		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 		if upd.Message != nil {
@@ -32,7 +32,7 @@ func (drv *Driver) Hears(word string) middleware.Predicate {
 	}
 }
 
-func (drv *Driver) Update(field string) middleware.Predicate {
+func Update(field string) middleware.Predicate {
 	return func(ctx context.Context) bool {
 		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 		if f, ok := structs.New(&upd).FieldOk(field); ok {

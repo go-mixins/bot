@@ -11,7 +11,7 @@ func (drv *Driver) WithReply(ctx context.Context, arg interface{}) {
 	if !ok {
 		return
 	}
-	if msg := drv.Message(ctx); msg != nil {
+	if msg := Message(ctx); msg != nil {
 		dest.ReplyToMessageID = msg.MessageID
 	}
 }

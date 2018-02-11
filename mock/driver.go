@@ -5,20 +5,12 @@ package mock
 
 import (
 	"context"
-	"github.com/andviro/middleware"
 	"sync"
 )
 
 var (
-	lockDriverMockClose    sync.RWMutex
-	lockDriverMockCommand  sync.RWMutex
-	lockDriverMockContext  sync.RWMutex
-	lockDriverMockHears    sync.RWMutex
-	lockDriverMockMessage  sync.RWMutex
-	lockDriverMockNext     sync.RWMutex
-	lockDriverMockReply    sync.RWMutex
-	lockDriverMockText     sync.RWMutex
-	lockDriverMockUserName sync.RWMutex
+	lockDriverMockContext sync.RWMutex
+	lockDriverMockNext    sync.RWMutex
 )
 
 // DriverMock is a mock implementation of Driver.
@@ -27,32 +19,11 @@ var (
 //
 //         // make and configure a mocked Driver
 //         mockedDriver := &DriverMock{
-//             CloseFunc: func() error {
-// 	               panic("TODO: mock out the Close method")
-//             },
-//             CommandFunc: func(in1 string) middleware.Predicate {
-// 	               panic("TODO: mock out the Command method")
-//             },
-//             ContextFunc: func(in1 context.Context, in2 middleware.Handler) error {
+//             ContextFunc: func() context.Context {
 // 	               panic("TODO: mock out the Context method")
-//             },
-//             HearsFunc: func(in1 string) middleware.Predicate {
-// 	               panic("TODO: mock out the Hears method")
-//             },
-//             MessageFunc: func(in1 context.Context) bool {
-// 	               panic("TODO: mock out the Message method")
 //             },
 //             NextFunc: func() bool {
 // 	               panic("TODO: mock out the Next method")
-//             },
-//             ReplyFunc: func(in1 context.Context, in2 interface{}) error {
-// 	               panic("TODO: mock out the Reply method")
-//             },
-//             TextFunc: func(in1 context.Context) string {
-// 	               panic("TODO: mock out the Text method")
-//             },
-//             UserNameFunc: func(in1 context.Context) string {
-// 	               panic("TODO: mock out the UserName method")
 //             },
 //         }
 //
@@ -61,234 +32,46 @@ var (
 //
 //     }
 type DriverMock struct {
-	// CloseFunc mocks the Close method.
-	CloseFunc func() error
-
-	// CommandFunc mocks the Command method.
-	CommandFunc func(in1 string) middleware.Predicate
-
 	// ContextFunc mocks the Context method.
-	ContextFunc func(in1 context.Context, in2 middleware.Handler) error
-
-	// HearsFunc mocks the Hears method.
-	HearsFunc func(in1 string) middleware.Predicate
-
-	// MessageFunc mocks the Message method.
-	MessageFunc func(in1 context.Context) bool
+	ContextFunc func() context.Context
 
 	// NextFunc mocks the Next method.
 	NextFunc func() bool
 
-	// ReplyFunc mocks the Reply method.
-	ReplyFunc func(in1 context.Context, in2 interface{}) error
-
-	// TextFunc mocks the Text method.
-	TextFunc func(in1 context.Context) string
-
-	// UserNameFunc mocks the UserName method.
-	UserNameFunc func(in1 context.Context) string
-
 	// calls tracks calls to the methods.
 	calls struct {
-		// Close holds details about calls to the Close method.
-		Close []struct {
-		}
-		// Command holds details about calls to the Command method.
-		Command []struct {
-			// In1 is the in1 argument value.
-			In1 string
-		}
 		// Context holds details about calls to the Context method.
 		Context []struct {
-			// In1 is the in1 argument value.
-			In1 context.Context
-			// In2 is the in2 argument value.
-			In2 middleware.Handler
-		}
-		// Hears holds details about calls to the Hears method.
-		Hears []struct {
-			// In1 is the in1 argument value.
-			In1 string
-		}
-		// Message holds details about calls to the Message method.
-		Message []struct {
-			// In1 is the in1 argument value.
-			In1 context.Context
 		}
 		// Next holds details about calls to the Next method.
 		Next []struct {
 		}
-		// Reply holds details about calls to the Reply method.
-		Reply []struct {
-			// In1 is the in1 argument value.
-			In1 context.Context
-			// In2 is the in2 argument value.
-			In2 interface{}
-		}
-		// Text holds details about calls to the Text method.
-		Text []struct {
-			// In1 is the in1 argument value.
-			In1 context.Context
-		}
-		// UserName holds details about calls to the UserName method.
-		UserName []struct {
-			// In1 is the in1 argument value.
-			In1 context.Context
-		}
 	}
-}
-
-// Close calls CloseFunc.
-func (mock *DriverMock) Close() error {
-	if mock.CloseFunc == nil {
-		panic("moq: DriverMock.CloseFunc is nil but Driver.Close was just called")
-	}
-	callInfo := struct {
-	}{}
-	lockDriverMockClose.Lock()
-	mock.calls.Close = append(mock.calls.Close, callInfo)
-	lockDriverMockClose.Unlock()
-	return mock.CloseFunc()
-}
-
-// CloseCalls gets all the calls that were made to Close.
-// Check the length with:
-//     len(mockedDriver.CloseCalls())
-func (mock *DriverMock) CloseCalls() []struct {
-} {
-	var calls []struct {
-	}
-	lockDriverMockClose.RLock()
-	calls = mock.calls.Close
-	lockDriverMockClose.RUnlock()
-	return calls
-}
-
-// Command calls CommandFunc.
-func (mock *DriverMock) Command(in1 string) middleware.Predicate {
-	if mock.CommandFunc == nil {
-		panic("moq: DriverMock.CommandFunc is nil but Driver.Command was just called")
-	}
-	callInfo := struct {
-		In1 string
-	}{
-		In1: in1,
-	}
-	lockDriverMockCommand.Lock()
-	mock.calls.Command = append(mock.calls.Command, callInfo)
-	lockDriverMockCommand.Unlock()
-	return mock.CommandFunc(in1)
-}
-
-// CommandCalls gets all the calls that were made to Command.
-// Check the length with:
-//     len(mockedDriver.CommandCalls())
-func (mock *DriverMock) CommandCalls() []struct {
-	In1 string
-} {
-	var calls []struct {
-		In1 string
-	}
-	lockDriverMockCommand.RLock()
-	calls = mock.calls.Command
-	lockDriverMockCommand.RUnlock()
-	return calls
 }
 
 // Context calls ContextFunc.
-func (mock *DriverMock) Context(in1 context.Context, in2 middleware.Handler) error {
+func (mock *DriverMock) Context() context.Context {
 	if mock.ContextFunc == nil {
 		panic("moq: DriverMock.ContextFunc is nil but Driver.Context was just called")
 	}
 	callInfo := struct {
-		In1 context.Context
-		In2 middleware.Handler
-	}{
-		In1: in1,
-		In2: in2,
-	}
+	}{}
 	lockDriverMockContext.Lock()
 	mock.calls.Context = append(mock.calls.Context, callInfo)
 	lockDriverMockContext.Unlock()
-	return mock.ContextFunc(in1, in2)
+	return mock.ContextFunc()
 }
 
 // ContextCalls gets all the calls that were made to Context.
 // Check the length with:
 //     len(mockedDriver.ContextCalls())
 func (mock *DriverMock) ContextCalls() []struct {
-	In1 context.Context
-	In2 middleware.Handler
 } {
 	var calls []struct {
-		In1 context.Context
-		In2 middleware.Handler
 	}
 	lockDriverMockContext.RLock()
 	calls = mock.calls.Context
 	lockDriverMockContext.RUnlock()
-	return calls
-}
-
-// Hears calls HearsFunc.
-func (mock *DriverMock) Hears(in1 string) middleware.Predicate {
-	if mock.HearsFunc == nil {
-		panic("moq: DriverMock.HearsFunc is nil but Driver.Hears was just called")
-	}
-	callInfo := struct {
-		In1 string
-	}{
-		In1: in1,
-	}
-	lockDriverMockHears.Lock()
-	mock.calls.Hears = append(mock.calls.Hears, callInfo)
-	lockDriverMockHears.Unlock()
-	return mock.HearsFunc(in1)
-}
-
-// HearsCalls gets all the calls that were made to Hears.
-// Check the length with:
-//     len(mockedDriver.HearsCalls())
-func (mock *DriverMock) HearsCalls() []struct {
-	In1 string
-} {
-	var calls []struct {
-		In1 string
-	}
-	lockDriverMockHears.RLock()
-	calls = mock.calls.Hears
-	lockDriverMockHears.RUnlock()
-	return calls
-}
-
-// Message calls MessageFunc.
-func (mock *DriverMock) Message(in1 context.Context) bool {
-	if mock.MessageFunc == nil {
-		panic("moq: DriverMock.MessageFunc is nil but Driver.Message was just called")
-	}
-	callInfo := struct {
-		In1 context.Context
-	}{
-		In1: in1,
-	}
-	lockDriverMockMessage.Lock()
-	mock.calls.Message = append(mock.calls.Message, callInfo)
-	lockDriverMockMessage.Unlock()
-	return mock.MessageFunc(in1)
-}
-
-// MessageCalls gets all the calls that were made to Message.
-// Check the length with:
-//     len(mockedDriver.MessageCalls())
-func (mock *DriverMock) MessageCalls() []struct {
-	In1 context.Context
-} {
-	var calls []struct {
-		In1 context.Context
-	}
-	lockDriverMockMessage.RLock()
-	calls = mock.calls.Message
-	lockDriverMockMessage.RUnlock()
 	return calls
 }
 
@@ -315,102 +98,5 @@ func (mock *DriverMock) NextCalls() []struct {
 	lockDriverMockNext.RLock()
 	calls = mock.calls.Next
 	lockDriverMockNext.RUnlock()
-	return calls
-}
-
-// Reply calls ReplyFunc.
-func (mock *DriverMock) Reply(in1 context.Context, in2 interface{}) error {
-	if mock.ReplyFunc == nil {
-		panic("moq: DriverMock.ReplyFunc is nil but Driver.Reply was just called")
-	}
-	callInfo := struct {
-		In1 context.Context
-		In2 interface{}
-	}{
-		In1: in1,
-		In2: in2,
-	}
-	lockDriverMockReply.Lock()
-	mock.calls.Reply = append(mock.calls.Reply, callInfo)
-	lockDriverMockReply.Unlock()
-	return mock.ReplyFunc(in1, in2)
-}
-
-// ReplyCalls gets all the calls that were made to Reply.
-// Check the length with:
-//     len(mockedDriver.ReplyCalls())
-func (mock *DriverMock) ReplyCalls() []struct {
-	In1 context.Context
-	In2 interface{}
-} {
-	var calls []struct {
-		In1 context.Context
-		In2 interface{}
-	}
-	lockDriverMockReply.RLock()
-	calls = mock.calls.Reply
-	lockDriverMockReply.RUnlock()
-	return calls
-}
-
-// Text calls TextFunc.
-func (mock *DriverMock) Text(in1 context.Context) string {
-	if mock.TextFunc == nil {
-		panic("moq: DriverMock.TextFunc is nil but Driver.Text was just called")
-	}
-	callInfo := struct {
-		In1 context.Context
-	}{
-		In1: in1,
-	}
-	lockDriverMockText.Lock()
-	mock.calls.Text = append(mock.calls.Text, callInfo)
-	lockDriverMockText.Unlock()
-	return mock.TextFunc(in1)
-}
-
-// TextCalls gets all the calls that were made to Text.
-// Check the length with:
-//     len(mockedDriver.TextCalls())
-func (mock *DriverMock) TextCalls() []struct {
-	In1 context.Context
-} {
-	var calls []struct {
-		In1 context.Context
-	}
-	lockDriverMockText.RLock()
-	calls = mock.calls.Text
-	lockDriverMockText.RUnlock()
-	return calls
-}
-
-// UserName calls UserNameFunc.
-func (mock *DriverMock) UserName(in1 context.Context) string {
-	if mock.UserNameFunc == nil {
-		panic("moq: DriverMock.UserNameFunc is nil but Driver.UserName was just called")
-	}
-	callInfo := struct {
-		In1 context.Context
-	}{
-		In1: in1,
-	}
-	lockDriverMockUserName.Lock()
-	mock.calls.UserName = append(mock.calls.UserName, callInfo)
-	lockDriverMockUserName.Unlock()
-	return mock.UserNameFunc(in1)
-}
-
-// UserNameCalls gets all the calls that were made to UserName.
-// Check the length with:
-//     len(mockedDriver.UserNameCalls())
-func (mock *DriverMock) UserNameCalls() []struct {
-	In1 context.Context
-} {
-	var calls []struct {
-		In1 context.Context
-	}
-	lockDriverMockUserName.RLock()
-	calls = mock.calls.UserName
-	lockDriverMockUserName.RUnlock()
 	return calls
 }

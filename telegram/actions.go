@@ -8,8 +8,8 @@ import (
 	"github.com/go-mixins/bot"
 )
 
-func (drv *Driver) Reply(ctx context.Context, text string, opts ...bot.Option) (err error) {
-	chat := drv.Chat(ctx)
+func (b *Bot) Reply(ctx context.Context, text string, opts ...bot.Option) (err error) {
+	chat := Chat(ctx)
 	if chat == nil {
 		return bot.Errors.New("no chat to reply in")
 	}
@@ -17,7 +17,7 @@ func (drv *Driver) Reply(ctx context.Context, text string, opts ...bot.Option) (
 	for _, opt := range opts {
 		opt(ctx, &msg)
 	}
-	_, err = drv.Send(msg)
+	_, err = b.Send(msg)
 	if err != nil {
 		err = bot.Errors.Wrap(err, "sending message")
 	}
