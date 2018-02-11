@@ -23,7 +23,7 @@ func main() {
 	}
 	defer b.Close()
 	b.Handle(func(ctx context.Context) error {
-		logger.Debug(b.Debug(ctx))
+		logger.Debug(telegram.DebugDump(ctx))
 		return nil
 	})
 	b.On(b.Command("start"), func(ctx context.Context) error {
@@ -42,7 +42,15 @@ func main() {
 		return b.Reply(ctx, "sticker!")
 	})
 	b.On(b.Message(bot.MsgNewChatMembers), func(ctx context.Context) error {
-		return b.Reply(ctx, "Hi!")
+		for _, u := range b.NewChatMembers(ctx) {
+			if u.UserName == b.Me(ctx).UserName {
+				continue
+			}
+			if err := b.Reply(ctx, "Hi, "+u.UserName+"!"); err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 	if err = b.Run(); err != nil {
 		logger.Fatalf("%+v", err)

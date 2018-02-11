@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/andviro/middleware"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
@@ -25,6 +26,12 @@ type Driver struct {
 }
 
 var _ bot.Driver = (*Driver)(nil)
+
+func DebugDump(ctx context.Context) string {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	jsonData, _ := json.MarshalIndent(upd, "", "  ")
+	return string(jsonData)
+}
 
 func New(token string) (res *generic.Bot, err error) {
 	driver := &Driver{
