@@ -10,6 +10,7 @@ type Driver interface {
 	Actions
 	Predicates
 	ContextFuncs
+	Options
 	Context(context.Context, middleware.Handler) error
 	Close() error
 	Next() bool

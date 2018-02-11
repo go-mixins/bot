@@ -20,7 +20,16 @@ func (drv *Driver) Command(cmd string) middleware.Predicate {
 
 func (drv *Driver) Hears(word string) middleware.Predicate {
 	return func(ctx context.Context) bool {
-		return drv.Text(ctx) == word
+		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+		if upd.Message != nil {
+			if upd.Message.Caption == word {
+				return true
+			}
+			if upd.Message.Text == word {
+				return true
+			}
+		}
+		return upd.CallbackQuery != nil && upd.CallbackQuery.Data == word
 	}
 }
 

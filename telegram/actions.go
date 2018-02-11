@@ -8,21 +8,16 @@ import (
 	"github.com/go-mixins/bot"
 )
 
-func (drv *Driver) Reply(ctx context.Context, obj interface{}) (err error) {
-	message := drv.message(ctx)
-	if message == nil || message.Chat == nil {
+func (drv *Driver) Reply(ctx context.Context, text string, opts ...bot.Option) (err error) {
+	chat := drv.chat(ctx)
+	if chat == nil {
 		return bot.Errors.New("no chat to reply in")
 	}
-	var v tgbotapi.Chattable
-	switch t := obj.(type) {
-	case string:
-		msg := tgbotapi.NewMessage(message.Chat.ID, t)
-		msg.ReplyToMessageID = message.MessageID
-		v = msg
-	default:
-		return bot.Errors.New("unsupported send object")
+	msg := tgbotapi.NewMessage(chat.ID, text)
+	for _, opt := range opts {
+		opt(ctx, &msg)
 	}
-	_, err = drv.api.Send(v)
+	_, err = drv.api.Send(msg)
 	if err != nil {
 		err = bot.Errors.Wrap(err, "sending message")
 	}

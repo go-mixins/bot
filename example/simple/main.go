@@ -33,7 +33,10 @@ func main() {
 		return b.Reply(ctx, "Bye!")
 	})
 	b.On(b.Hears("lol"), func(ctx context.Context) error {
-		return b.Reply(ctx, "lol yourself")
+		return b.Reply(ctx, "lol yourself", b.WithReply)
+	})
+	b.On(b.Message(bot.MsgText), func(ctx context.Context) error {
+		return b.Reply(ctx, b.Msg(ctx).Text)
 	})
 	b.On(b.Message(bot.MsgSticker), func(ctx context.Context) error {
 		return b.Reply(ctx, "sticker!")

@@ -8,32 +8,72 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func (drv *Driver) Text(ctx context.Context) (res string) {
+func (drv *Driver) Msg(ctx context.Context) *bot.Message {
 	msg := drv.message(ctx)
 	if msg == nil {
-		return
+		return nil
 	}
-	if msg.Caption != "" {
-		return msg.Caption
+	return &bot.Message{
+		Text: msg.Text,
+		Meta: bot.Meta{
+			Platform: "telegram",
+		},
 	}
-	return msg.Text
+}
+
+func (drv *Driver) user(u *tgbotapi.User) *bot.User {
+	if u == nil {
+		return nil
+	}
+	return &bot.User{
+		FirstName:    u.FirstName,
+		LastName:     u.LastName,
+		UserName:     u.UserName,
+		LanguageCode: u.LanguageCode,
+		Meta: bot.Meta{
+			Platform: "telegram",
+		},
+	}
+}
+
+func (drv *Driver) chat(ctx context.Context) (res *tgbotapi.Chat) {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	switch {
+	case upd.Message != nil:
+		res = upd.Message.Chat
+	case upd.CallbackQuery != nil && upd.CallbackQuery.Message != nil:
+		res = upd.CallbackQuery.Message.Chat
+	case upd.ChannelPost != nil:
+		res = upd.ChannelPost.Chat
+	case upd.EditedChannelPost != nil:
+		res = upd.EditedChannelPost.Chat
+	case upd.EditedMessage != nil:
+		res = upd.EditedMessage.Chat
+	}
+	return
+}
+
+func (drv *Driver) Chat(ctx context.Context) *bot.Chat {
+	chat := drv.chat(ctx)
+	if chat == nil {
+		return nil
+	}
+	return &bot.Chat{
+		Meta: bot.Meta{
+			Platform: "telegram",
+		},
+		Type:        chat.Type,
+		Title:       chat.Title,
+		UserName:    chat.UserName,
+		FirstName:   chat.FirstName,
+		LastName:    chat.LastName,
+		Description: chat.Description,
+	}
 }
 
 func (drv *Driver) message(ctx context.Context) (res *tgbotapi.Message) {
 	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
-	switch {
-	case upd.Message != nil:
-		res = upd.Message
-	case upd.CallbackQuery != nil:
-		res = upd.CallbackQuery.Message
-	case upd.ChannelPost != nil:
-		res = upd.ChannelPost
-	case upd.EditedChannelPost != nil:
-		res = upd.EditedChannelPost
-	case upd.EditedMessage != nil:
-		res = upd.EditedMessage
-	}
-	return
+	return upd.Message
 }
 
 func (drv *Driver) from(ctx context.Context) (from *tgbotapi.User) {
@@ -61,17 +101,12 @@ func (drv *Driver) from(ctx context.Context) (from *tgbotapi.User) {
 	return
 }
 
+func (drv *Driver) Me(ctx context.Context) *bot.User {
+	return drv.user(&drv.api.Self)
+}
+
 func (drv *Driver) From(ctx context.Context) *bot.User {
-	from := drv.from(ctx)
-	if from == nil {
-		return nil
-	}
-	return &bot.User{
-		FirstName:    from.FirstName,
-		LastName:     from.LastName,
-		UserName:     from.UserName,
-		LanguageCode: from.LanguageCode,
-	}
+	return drv.user(drv.from(ctx))
 }
 
 func (drv *Driver) Debug(ctx context.Context) string {
