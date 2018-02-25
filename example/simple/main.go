@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/andviro/middleware"
-	"github.com/go-mixins/log"
 	"github.com/go-mixins/log/logrus"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
@@ -26,12 +25,6 @@ func main() {
 	}
 	b.Concurrency = 100
 	b.Use(func(ctx context.Context, next middleware.Handler) (err error) {
-		msg := tg.Message(ctx)
-		if msg != nil {
-			logger.WithContext(log.M{
-				"from": msg.From,
-			}).Debug(msg.Text)
-		}
 		return next.Apply(ctx)
 	})
 	b.On(tg.Command("start"), func(ctx context.Context) error {
@@ -44,20 +37,41 @@ func main() {
 		return b.Reply(ctx, "sample keyboard", func(msg *tgbotapi.MessageConfig) {
 			msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 				tgbotapi.NewInlineKeyboardRow(
-					tgbotapi.NewInlineKeyboardButtonData("1", "/1"),
-					tgbotapi.NewInlineKeyboardButtonData("2", "/2"),
-					tgbotapi.NewInlineKeyboardButtonData("3", "/3"),
+					tgbotapi.NewInlineKeyboardButtonData("1", "1"),
+					tgbotapi.NewInlineKeyboardButtonData("2", "2"),
+					tgbotapi.NewInlineKeyboardButtonData("3", "3"),
 				),
 			)
 		})
 	})
-	b.On(tg.Action("/1"), func(ctx context.Context) error {
-		return b.Reply(ctx, "1")
+	b.On(tg.Action("1"), func(ctx context.Context) error {
+		return b.EditMessageText(ctx, "sample keyboard (1)", func(msg *tgbotapi.EditMessageTextConfig) {
+			markup := tgbotapi.NewInlineKeyboardMarkup(
+				tgbotapi.NewInlineKeyboardRow(
+					tgbotapi.NewInlineKeyboardButtonData("1", "1"),
+					tgbotapi.NewInlineKeyboardButtonData("2", "2"),
+					tgbotapi.NewInlineKeyboardButtonData("3", "3"),
+				),
+			)
+			msg.ReplyMarkup = &markup
+		})
+	})
+	b.On(tg.Action("2"), func(ctx context.Context) error {
+		return b.EditMessageText(ctx, "sample keyboard (2)")
+	})
+	b.On(tg.Action("3"), func(ctx context.Context) error {
+		return b.EditMessageText(ctx, "sample keyboard (1)", func(msg *tgbotapi.EditMessageTextConfig) {
+			markup := tgbotapi.NewInlineKeyboardMarkup(
+				tgbotapi.NewInlineKeyboardRow(
+					tgbotapi.NewInlineKeyboardButtonData("1", "1"),
+					tgbotapi.NewInlineKeyboardButtonData("2", "2"),
+				),
+			)
+			msg.ReplyMarkup = &markup
+		})
 	})
 	b.On(tg.Hears("lol"), func(ctx context.Context) error {
-		return b.Reply(ctx, "lol yourself", func(msg *tgbotapi.MessageConfig) {
-			msg.ReplyToMessageID = tg.Message(ctx).MessageID
-		})
+		return b.Reply(ctx, "lol yourself", b.WithReply(ctx))
 	})
 	b.On(tg.Update("Text"), func(ctx context.Context) error {
 		return b.Reply(ctx, tg.Message(ctx).Text)

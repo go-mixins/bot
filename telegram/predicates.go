@@ -10,8 +10,9 @@ import (
 
 func Command(cmd string) middleware.Predicate {
 	return func(ctx context.Context) bool {
-		if msg := Message(ctx); msg != nil {
-			return msg.IsCommand() && cmd == msg.Command()
+		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+		if upd.Message != nil {
+			return upd.Message.IsCommand() && cmd == upd.Message.Command()
 		}
 		return false
 	}
