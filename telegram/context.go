@@ -52,3 +52,8 @@ func Message(ctx context.Context) (res *tgbotapi.Message) {
 	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 	return upd.Message
 }
+
+func Upd(ctx context.Context) (res tgbotapi.Update) {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	return upd
+}

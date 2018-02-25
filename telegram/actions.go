@@ -15,7 +15,7 @@ func (b *Bot) Reply(ctx context.Context, text string, opts ...bot.Option) (err e
 	}
 	msg := tgbotapi.NewMessage(chat.ID, text)
 	for _, opt := range opts {
-		opt(ctx, &msg)
+		opt(&msg)
 	}
 	_, err = b.Send(msg)
 	if err != nil {

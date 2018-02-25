@@ -1,5 +1,7 @@
 package bot
 
-import "context"
+import (
+	"github.com/go-telegram-bot-api/telegram-bot-api"
+)
 
-type Option func(context.Context, interface{})
+type Option func(*tgbotapi.MessageConfig)

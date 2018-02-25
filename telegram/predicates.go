@@ -46,3 +46,13 @@ func Update(field string) middleware.Predicate {
 		return false
 	}
 }
+
+func Action(q string) middleware.Predicate {
+	return func(ctx context.Context) bool {
+		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+		if upd.CallbackQuery == nil {
+			return false
+		}
+		return upd.CallbackQuery.Data == q
+	}
+}

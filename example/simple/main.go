@@ -8,6 +8,8 @@ import (
 	"github.com/go-mixins/log"
 	"github.com/go-mixins/log/logrus"
 
+	"github.com/go-telegram-bot-api/telegram-bot-api"
+
 	tg "github.com/go-mixins/bot/telegram"
 )
 
@@ -38,8 +40,24 @@ func main() {
 	b.On(tg.Command("quit"), func(ctx context.Context) error {
 		return b.Reply(ctx, "Bye!")
 	})
+	b.On(tg.Command("list"), func(ctx context.Context) error {
+		return b.Reply(ctx, "sample keyboard", func(msg *tgbotapi.MessageConfig) {
+			msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
+				tgbotapi.NewInlineKeyboardRow(
+					tgbotapi.NewInlineKeyboardButtonData("1", "/1"),
+					tgbotapi.NewInlineKeyboardButtonData("2", "/2"),
+					tgbotapi.NewInlineKeyboardButtonData("3", "/3"),
+				),
+			)
+		})
+	})
+	b.On(tg.Action("/1"), func(ctx context.Context) error {
+		return b.Reply(ctx, "1")
+	})
 	b.On(tg.Hears("lol"), func(ctx context.Context) error {
-		return b.Reply(ctx, "lol yourself", b.WithReply)
+		return b.Reply(ctx, "lol yourself", func(msg *tgbotapi.MessageConfig) {
+			msg.ReplyToMessageID = tg.Message(ctx).MessageID
+		})
 	})
 	b.On(tg.Update("Text"), func(ctx context.Context) error {
 		return b.Reply(ctx, tg.Message(ctx).Text)
