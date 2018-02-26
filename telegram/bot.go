@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 
@@ -51,7 +52,9 @@ var _ bot.Bot = (*Bot)(nil)
 func New(token string) (res *Bot, err error) {
 	res = new(Bot)
 	res.Driver.stop = make(chan struct{})
-	if res.Driver.BotAPI, err = tgbotapi.NewBotAPI(token); err != nil {
+	if res.Driver.BotAPI, err = tgbotapi.NewBotAPIWithClient(token, &http.Client{
+		Transport: newTransport(),
+	}); err != nil {
 		err = bot.Errors.Wrap(err, "creating telegram bot")
 		return
 	}
