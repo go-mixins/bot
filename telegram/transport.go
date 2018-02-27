@@ -1,7 +1,8 @@
 package telegram
 
 import (
-	"fmt"
+	"bytes"
+	"io/ioutil"
 	"net/http"
 	"sync"
 
@@ -24,8 +25,13 @@ func newTransport() http.RoundTripper {
 }
 
 func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	fmt.Printf("request: %+v\n", req)
-	uid := req.PostFormValue("chat_id")
+	data, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return nil, err
+	}
+	req.Body = ioutil.NopCloser(bytes.NewReader(data))
+	uid := req.FormValue("chat_id")
+	req.Body = ioutil.NopCloser(bytes.NewReader(data))
 	if uid != "" {
 		var limiter ratelimit.Limiter
 		var ok bool
@@ -33,14 +39,12 @@ func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
 			t.l.Lock()
 			defer t.l.Unlock()
 			if limiter, ok = t.chatLimits[uid]; !ok {
-				limiter = ratelimit.New(1)
+				limiter = ratelimit.New(1, ratelimit.WithoutSlack)
 				t.chatLimits[uid] = limiter
 			}
 		}()
 		limiter.Take()
 	}
 	t.globalLimit.Take()
-	resp, err := t.RoundTripper.RoundTrip(req)
-	fmt.Printf("%+v %+v", resp, err)
-	return resp, err
+	return t.RoundTripper.RoundTrip(req)
 }
