@@ -14,7 +14,6 @@ type botKeyType int
 
 const (
 	botKey botKeyType = iota
-	meKey
 )
 
 type Driver struct {

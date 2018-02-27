@@ -6,7 +6,7 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func From(ctx context.Context) (from *tgbotapi.User) {
+func (Driver) From(ctx context.Context) (from *tgbotapi.User) {
 	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 	switch {
 	case upd.Message != nil:
@@ -31,7 +31,7 @@ func From(ctx context.Context) (from *tgbotapi.User) {
 	return
 }
 
-func Chat(ctx context.Context) (res *tgbotapi.Chat) {
+func (Driver) Chat(ctx context.Context) (res *tgbotapi.Chat) {
 	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 	switch {
 	case upd.Message != nil:
@@ -48,12 +48,12 @@ func Chat(ctx context.Context) (res *tgbotapi.Chat) {
 	return
 }
 
-func Message(ctx context.Context) (res *tgbotapi.Message) {
+func (Driver) Message(ctx context.Context) (res *tgbotapi.Message) {
 	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 	return upd.Message
 }
 
-func Upd(ctx context.Context) (res tgbotapi.Update) {
+func (Driver) Update(ctx context.Context) (res tgbotapi.Update) {
 	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 	return upd
 }

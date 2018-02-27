@@ -74,13 +74,13 @@ func main() {
 		return b.Reply(ctx, "lol yourself", b.WithReply(ctx))
 	})
 	b.On(tg.Update("Text"), func(ctx context.Context) error {
-		return b.Reply(ctx, tg.Message(ctx).Text)
+		return b.Reply(ctx, b.Message(ctx).Text)
 	})
 	b.On(tg.Update("Sticker"), func(ctx context.Context) error {
 		return b.Reply(ctx, "sticker!")
 	})
 	b.On(tg.Update("NewChatMembers"), func(ctx context.Context) error {
-		for _, u := range *tg.Message(ctx).NewChatMembers {
+		for _, u := range *b.Message(ctx).NewChatMembers {
 			if u.UserName == b.Self.UserName {
 				return b.Reply(ctx, "Hello all!")
 			}
@@ -91,9 +91,9 @@ func main() {
 		return nil
 	})
 	b.On(tg.Update("LeftChatMember"), func(ctx context.Context) error {
-		u := tg.Message(ctx).LeftChatMember
+		u := b.Message(ctx).LeftChatMember
 		if u.UserName == b.Self.UserName {
-			logger.Warnf("Was kicked from %s by %s", tg.Chat(ctx).Title, tg.From(ctx))
+			logger.Warnf("Was kicked from %s by %s", b.Chat(ctx).Title, b.From(ctx))
 			return nil
 		}
 		return b.Reply(ctx, "Bye, "+u.UserName+"!")

@@ -9,7 +9,7 @@ import (
 )
 
 func (b *Bot) Reply(ctx context.Context, text string, opts ...bot.MessageOption) (err error) {
-	chat := Chat(ctx)
+	chat := b.Chat(ctx)
 	if chat == nil {
 		return bot.Errors.New("no chat to reply in")
 	}
