@@ -33,10 +33,10 @@ func (b *Bot) Run(driver bot.Driver) error {
 	return nil
 }
 
-func (b *Bot) On(p middleware.Predicate, h middleware.Handler) {
+func (b *Bot) On(p middleware.Predicate, h middleware.Handler, mws ...middleware.Middleware) {
 	b.l.Lock()
 	defer b.l.Unlock()
-	b.mw = b.mw.On(p, h)
+	b.mw = b.mw.On(p, h.Use(mws...))
 }
 
 func (b *Bot) Use(mws ...middleware.Middleware) {

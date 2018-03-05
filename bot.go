@@ -5,7 +5,7 @@ import (
 )
 
 type Bot interface {
-	On(middleware.Predicate, middleware.Handler)
+	On(middleware.Predicate, middleware.Handler, ...middleware.Middleware)
 	Use(...middleware.Middleware)
 }
 
