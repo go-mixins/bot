@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/andviro/middleware"
 	"github.com/fatih/structs"
@@ -9,27 +10,27 @@ import (
 )
 
 func Command(cmd string) middleware.Predicate {
+	cmdRe := regexp.MustCompile(cmd)
 	return func(ctx context.Context) bool {
 		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 		if upd.Message != nil {
-			return upd.Message.IsCommand() && cmd == upd.Message.Command()
+			return upd.Message.IsCommand() && cmdRe.MatchString(upd.Message.Command())
 		}
 		return false
 	}
 }
 
 func Hears(word string) middleware.Predicate {
+	wordRe := regexp.MustCompile(word)
 	return func(ctx context.Context) bool {
 		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
-		if upd.Message != nil {
-			if upd.Message.Caption == word {
-				return true
-			}
-			if upd.Message.Text == word {
-				return true
-			}
+		switch {
+		case upd.Message != nil:
+			return wordRe.MatchString(upd.Message.Caption) || wordRe.MatchString(upd.Message.Text)
+		case upd.CallbackQuery != nil:
+			return wordRe.MatchString(upd.CallbackQuery.Data)
 		}
-		return upd.CallbackQuery != nil && upd.CallbackQuery.Data == word
+		return false
 	}
 }
 
@@ -56,9 +57,4 @@ func Action(q string) middleware.Predicate {
 		}
 		return upd.CallbackQuery.Data == q
 	}
-}
-
-func Text(ctx context.Context) bool {
-	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
-	return upd.Message != nil && upd.Message.Text != ""
 }
