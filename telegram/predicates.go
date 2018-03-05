@@ -57,3 +57,8 @@ func Action(q string) middleware.Predicate {
 		return upd.CallbackQuery.Data == q
 	}
 }
+
+func Text(ctx context.Context) bool {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	return upd.Message != nil && upd.Message.Text != ""
+}
