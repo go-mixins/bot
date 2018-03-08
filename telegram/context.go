@@ -48,6 +48,22 @@ func (Driver) Chat(ctx context.Context) (res *tgbotapi.Chat) {
 	return
 }
 
+func (Driver) Command(ctx context.Context) (res string) {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	if upd.Message != nil {
+		return upd.Message.Command()
+	}
+	return
+}
+
+func (Driver) Arguments(ctx context.Context) (res string) {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	if upd.Message != nil {
+		return upd.Message.CommandArguments()
+	}
+	return
+}
+
 func (Driver) Message(ctx context.Context) (res *tgbotapi.Message) {
 	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 	return upd.Message

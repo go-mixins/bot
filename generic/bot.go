@@ -9,10 +9,9 @@ import (
 )
 
 type Bot struct {
-	pre, mw     middleware.Middleware
-	Handler     middleware.Handler
-	Concurrency int
-	l           sync.RWMutex
+	pre, mw middleware.Middleware
+	Handler middleware.Handler
+	l       sync.RWMutex
 }
 
 var _ bot.Bot = (*Bot)(nil)
@@ -24,9 +23,6 @@ func (b *Bot) handle(ctx context.Context) (err error) {
 }
 
 func (b *Bot) Run(driver bot.Driver) error {
-	if b.Concurrency == 0 {
-		b.Concurrency = 1
-	}
 	for driver.Next() {
 		go b.handle(driver.Context())
 	}
@@ -37,6 +33,12 @@ func (b *Bot) On(p middleware.Predicate, h middleware.Handler, mws ...middleware
 	b.l.Lock()
 	defer b.l.Unlock()
 	b.mw = b.mw.On(p, h.Use(mws...))
+}
+
+func (b *Bot) Branch(p middleware.Predicate, mws ...middleware.Middleware) {
+	b.l.Lock()
+	defer b.l.Unlock()
+	b.mw = b.mw.Branch(p, mws...)
 }
 
 func (b *Bot) Use(mws ...middleware.Middleware) {
