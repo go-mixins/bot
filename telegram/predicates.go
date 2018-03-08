@@ -3,14 +3,15 @@ package telegram
 import (
 	"context"
 	"regexp"
+	"strings"
 
 	"github.com/andviro/middleware"
 	"github.com/fatih/structs"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func Command(cmd string) middleware.Predicate {
-	cmdRe := regexp.MustCompile(cmd)
+func Command(cmd ...string) middleware.Predicate {
+	cmdRe := regexp.MustCompile("^" + strings.Join(cmd, "|") + "$")
 	return func(ctx context.Context) bool {
 		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 		if upd.Message != nil {
