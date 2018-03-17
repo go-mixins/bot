@@ -35,6 +35,13 @@ func Hears(word string) middleware.Predicate {
 	}
 }
 
+func Message() middleware.Predicate {
+	return func(ctx context.Context) bool {
+		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+		return upd.Message != nil
+	}
+}
+
 func Update(field string) middleware.Predicate {
 	return func(ctx context.Context) bool {
 		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
