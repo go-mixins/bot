@@ -58,11 +58,15 @@ func (Driver) Command(ctx context.Context) (res string) {
 
 func (Driver) Arguments(ctx context.Context) (res string) {
 	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
-	if msg := upd.Message; msg != nil {
+	switch {
+	case upd.Message != nil:
+		msg := upd.Message
 		if msg.IsCommand() {
 			return msg.CommandArguments()
 		}
 		return msg.Text
+	case upd.CallbackQuery != nil:
+		return upd.CallbackQuery.Data
 	}
 	return
 }
