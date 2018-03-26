@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"encoding/json"
 	"regexp"
 	"strings"
 
@@ -64,5 +65,19 @@ func Action(q string) middleware.Predicate {
 			return false
 		}
 		return upd.CallbackQuery.Data == q
+	}
+}
+
+func Callback(name string) middleware.Predicate {
+	return func(ctx context.Context) bool {
+		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+		if upd.CallbackQuery == nil {
+			return false
+		}
+		var cb CallbackData
+		if err := json.Unmarshal([]byte(upd.CallbackQuery.Data), &cb); err != nil {
+			return false
+		}
+		return cb.Type == name
 	}
 }
