@@ -35,3 +35,17 @@ func (b *Bot) EditMessageText(ctx context.Context, text string, opts ...bot.Edit
 	err = bot.Errors.Wrap(err, "sending message edit")
 	return
 }
+
+func (b *Bot) EditMessageCaption(ctx context.Context, text string, opts ...bot.EditMessageCaptionOption) (err error) {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	if upd.CallbackQuery == nil || upd.CallbackQuery.Message == nil || upd.CallbackQuery.Message.Chat == nil {
+		return nil
+	}
+	editMsg := tgbotapi.NewEditMessageCaption(upd.CallbackQuery.Message.Chat.ID, upd.CallbackQuery.Message.MessageID, text)
+	for _, opt := range opts {
+		opt(&editMsg)
+	}
+	_, err = b.Send(editMsg)
+	err = bot.Errors.Wrap(err, "sending message edit")
+	return
+}

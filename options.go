@@ -6,3 +6,4 @@ import (
 
 type MessageOption func(*tgbotapi.MessageConfig)
 type EditMessageOption func(*tgbotapi.EditMessageTextConfig)
+type EditMessageCaptionOption func(*tgbotapi.EditMessageCaptionConfig)
