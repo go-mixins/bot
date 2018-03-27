@@ -2,8 +2,6 @@ package telegram
 
 import (
 	"context"
-	"net/url"
-	"strings"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -81,17 +79,4 @@ func (Driver) Message(ctx context.Context) (res *tgbotapi.Message) {
 func (Driver) Update(ctx context.Context) (res tgbotapi.Update) {
 	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 	return upd
-}
-
-func (Driver) CallbackData(ctx context.Context) (values url.Values) {
-	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
-	if upd.CallbackQuery == nil {
-		return
-	}
-	cbdata := strings.SplitN(upd.CallbackQuery.Data, "?", 2)
-	if len(cbdata) != 2 {
-		return
-	}
-	values, _ = url.ParseQuery(cbdata[1])
-	return
 }

@@ -57,12 +57,10 @@ func Update(field string) middleware.Predicate {
 	}
 }
 
-func Action(name string) middleware.Predicate {
+func Action(acts ...string) middleware.Predicate {
+	actRe := regexp.MustCompile("^" + strings.Join(acts, "|") + "$")
 	return func(ctx context.Context) bool {
 		upd, _ := ctx.Value(botKey).(tgbotapi.Update)
-		if upd.CallbackQuery == nil {
-			return false
-		}
-		return strings.HasPrefix(upd.CallbackQuery.Data, name+"?") || name == upd.CallbackQuery.Data
+		return upd.CallbackQuery != nil && actRe.MatchString(upd.CallbackQuery.Data)
 	}
 }
