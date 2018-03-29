@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -79,4 +80,18 @@ func (Driver) Message(ctx context.Context) (res *tgbotapi.Message) {
 func (Driver) Update(ctx context.Context) (res tgbotapi.Update) {
 	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
 	return upd
+}
+
+func (Driver) SaveContext(ctx context.Context) ([]byte, error) {
+	upd, _ := ctx.Value(botKey).(tgbotapi.Update)
+	return json.Marshal(upd)
+}
+
+func (Driver) RestoreContext(ctx context.Context, data []byte) (res context.Context, err error) {
+	var upd tgbotapi.Update
+	if err = json.Unmarshal(data, &upd); err != nil {
+		return
+	}
+	res = context.WithValue(ctx, botKey, upd)
+	return
 }
