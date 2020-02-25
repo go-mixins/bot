@@ -16,7 +16,7 @@ type transport struct {
 	http.RoundTripper
 }
 
-func newTransport() http.RoundTripper {
+func newTransport() *transport {
 	return &transport{
 		chatLimits:   make(map[string]ratelimit.Limiter),
 		globalLimit:  ratelimit.New(30),
